@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Medivault Hospital System</title>
+</head>
+<body>
+  <center>
+    <h2>🏥 Medivault</h2>
+
+    <!-- Patients -->
+    <section id="patients">
+      <h3>Register / Update Patient</h3>
+      <form id="patient-form">
+        <input type="number" name="patient_id" placeholder="Patient ID (for update)" />
+        <input type="text" name="patient_name" placeholder="Patient Name" required />
+        <input type="number" name="age" placeholder="Age" required />
+        <select name="gender" required>
+          <option disabled selected>Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        <input type="text" name="contact" placeholder="Contact" required />
+        <button type="submit">Save Patient</button>
+      </form>
+
+      <h4>All Patients</h4>
+      <button onclick="loadPatients()">Load Patients</button>
+      <table border="1" id="patients-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Contact</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Doctors -->
+    <section id="doctors">
+      <h3>Register / Update Doctor</h3>
+      <form id="doctor-form">
+        <input type="number" name="doctor_id" placeholder="Doctor ID (for update)" />
+        <input type="text" name="doctor_name" placeholder="Doctor Name" required />
+        <input type="text" name="specialization" placeholder="Specialization" required />
+        <input type="text" name="phone" placeholder="Phone" required />
+        <button type="submit">Save Doctor</button>
+      </form>
+
+      <h4>All Doctors</h4>
+      <button onclick="loadDoctors()">Load Doctors</button>
+      <table border="1" id="doctors-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Specialization</th><th>Phone</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Appointments -->
+    <section id="appointments">
+      <h3>Book / Update Appointment</h3>
+      <form id="appointment-form">
+        <input type="number" name="appointment_id" placeholder="Appointment ID (for update)" />
+        <input type="number" name="patient_id" placeholder="Patient ID" required />
+        <input type="number" name="doctor_id" placeholder="Doctor ID" required />
+        <input type="date" name="appointment_date" required />
+        <select name="status" required>
+          <option disabled selected>Status</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Pending">Pending</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <button type="submit">Save Appointment</button>
+      </form>
+
+      <h4>All Appointments</h4>
+      <button onclick="loadAppointments()">Load Appointments</button>
+      <table border="1" id="appointments-table">
+        <thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Departments -->
+<section id="departments">
+  <h3>Add / Update Department</h3>
+  <form id="department-form">
+    <input type="number" name="department_id" placeholder="Department ID (for update)" />
+    <input type="text" name="department_name" placeholder="Department Name" required />
+    <input type="number" name="floor" placeholder="Floor Number" required />
+    <button type="submit">Save Department</button>
+  </form>
+
+  <h4>All Departments</h4>
+  <button onclick="loadDepartments()">Load Departments</button>
+  <table border="1" id="departments-table">
+    <thead><tr><th>ID</th><th>Name</th><th>Floor</th><th>Actions</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  </section>
+
+
+    <footer>
+      <p>&copy; 24U022009 Jeet Narayan</p>
+    </footer>
+  </center>
+
+  <script>
+    // Patients
+    document.querySelector('#patient-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        patient_name: form.patient_name.value,
+        age: form.age.value,
+        gender: form.gender.value,
+        contact: form.contact.value
+      };
+      const id = form.patient_id.value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/patients/${id}` : '/api/patients';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      alert(result.message);
+      form.reset();
+      loadPatients();
+    });
+
+    async function loadPatients() {
+      const res = await fetch('/api/patients');
+      const patients = await res.json();
+      const tbody = document.querySelector('#patients-table tbody');
+      tbody.innerHTML = '';
+      patients.forEach(p => {
+        tbody.innerHTML += `<tr>
+          <td>${p.patient_id}</td>
+          <td>${p.patient_name}</td>
+          <td>${p.age}</td>
+          <td>${p.gender}</td>
+          <td>${p.contact}</td>
+          <td><button onclick="deletePatient(${p.patient_id})">Delete</button></td>
+        </tr>`;
+      });
+    }
+
+    async function deletePatient(id) {
+      if (!confirm('Delete this patient?')) return;
+      const res = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      alert(result.message);
+      loadPatients();
+    }
+
+    // Doctors
+    document.querySelector('#doctor-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        doctor_name: form.doctor_name.value,
+        specialization: form.specialization.value,
+        phone: form.phone.value
+      };
+      const id = form.doctor_id.value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/doctors/${id}` : '/api/doctors';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      alert(result.message);
+      form.reset();
+      loadDoctors();
+    });
+
+    async function loadDoctors() {
+      const res = await fetch('/api/doctors');
+      const doctors = await res.json();
+      const tbody = document.querySelector('#doctors-table tbody');
+      tbody.innerHTML = '';
+      doctors.forEach(d => {
+        tbody.innerHTML += `<tr>
+          <td>${d.doctor_id}</td>
+          <td>${d.doctor_name}</td>
+          <td>${d.specialization}</td>
+          <td>${d.phone}</td>
+          <td><button onclick="deleteDoctor(${d.doctor_id})">Delete</button></td>
+        </tr>`;
+      });
+    }
+
+    async function deleteDoctor(id) {
+      if (!confirm('Delete this doctor?')) return;
+      const res = await fetch(`/api/doctors/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      alert(result.message);
+      loadDoctors();
+    }
+
+    // Appointments
+    document.querySelector('#appointment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        patient_id: form.patient_id.value,
+        doctor_id: form.doctor_id.value,
+        appointment_date: form.appointment_date.value,
+        status: form.status.value
+      };
+      const id = form.appointment_id.value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/api/appointments/${id}` : '/api/appointments';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      alert(result.message);
+      form.reset();
+      loadAppointments();
+    });
+
+    async function loadAppointments() {
+      const res = await fetch('/api/appointments');
+      const appointments = await res.json();
+      const tbody = document.querySelector('#appointments-table tbody');
+      tbody.innerHTML = '';
+      appointments.forEach(a => {
+        tbody.innerHTML += `<tr>
+          <td>${a.appointment_id}</td>
+          <td>${a.patient_id}</td>
+          <td>${a.doctor_id}</td>
+          <td>${a.appointment_date}</td>
+          <td>${a.status}</td>
+          <td><button onclick="deleteAppointment(${a.appointment_id})">Delete</button></td>
+        </tr>`;
+      });
+    }
+
+    async function deleteAppointment(id) {
+      if (!confirm('Delete this appointment?')) return;
+      const res = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      alert(result.message);
+      loadAppointments();
+    }
+
+  // Departments
+  document.querySelector('#department-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+      department_name: form.department_name.value,
+      floor: form.floor.value
+    };
+    const id = form.department_id.value;
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/departments/${id}` : '/api/departments';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    alert(result.message);
+    form.reset();
+    loadDepartments();
+  });
+
+  async function loadDepartments() {
+    const res = await fetch('/api/departments');
+    const departments = await res.json();
+    const tbody = document.querySelector('#departments-table tbody');
+    tbody.innerHTML = '';
+    departments.forEach(d => {
+      tbody.innerHTML += `<tr>
+        <td>${d.department_id}</td>
+        <td>${d.department_name}</td>
+        <td>${d.floor}</td>
+        <td><button onclick="deleteDepartment(${d.department_id})">Delete</button></td>
+      </tr>`;
+    });
+  }
+
+  async function deleteDepartment(id) {
+    if (!confirm('Delete this department?')) return;
+    const res = await fetch(`/api/departments/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    alert(result.message);
+    loadDepartments();
+  }
+  </script>
+</body>
+</html>
